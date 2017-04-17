@@ -1,0 +1,276 @@
+<div class="apidocDiv">
+<style>
+/*csslint
+*/
+.apidocDiv {
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.apidocDiv a[href] {
+    color: #33f;
+    font-weight: bold;
+    text-decoration: none;
+}
+.apidocDiv a[href]:hover {
+    text-decoration: underline;
+}
+.apidocCodeCommentSpan {
+    background: #bbf;
+    color: #000;
+    display: block;
+}
+.apidocCodeKeywordSpan {
+    color: #d00;
+    font-weight: bold;
+}
+.apidocCodePre {
+    background: #eef;
+    border: 1px solid;
+    color: #777;
+    padding: 5px;
+    white-space: pre-wrap;
+}
+.apidocFooterDiv {
+    margin-top: 20px;
+    text-align: center;
+}
+.apidocModuleLi {
+    margin-top: 10px;
+}
+.apidocSectionDiv {
+    border-top: 1px solid;
+    margin-top: 20px;
+}
+.apidocSignatureSpan {
+    color: #777;
+    font-weight: bold;
+}
+</style>
+<h1>api documentation for
+    <a
+
+        href="https://github.com/substack/hyperstream"
+
+    >hyperstream (v1.2.2)</a>
+</h1>
+<h4>stream html into html at a css selector</h4>
+<div class="apidocSectionDiv"><a
+    href="#apidoc.tableOfContents"
+    id="apidoc.tableOfContents"
+><h1>table of contents</h1></a><ol>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.hyperstream">module hyperstream</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.hyperstream.hyperstream">
+            function <span class="apidocSignatureSpan"></span>hyperstream
+            <span class="apidocSignatureSpan">(streams)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.hyperstream.toString">
+            function <span class="apidocSignatureSpan">hyperstream.</span>toString
+            <span class="apidocSignatureSpan">()</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.hyperstream.toString">module hyperstream.toString</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.hyperstream.toString.toString">
+            function <span class="apidocSignatureSpan">hyperstream.</span>toString
+            <span class="apidocSignatureSpan">()</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+</ol></div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.hyperstream" id="apidoc.module.hyperstream">module hyperstream</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.hyperstream.hyperstream" id="apidoc.element.hyperstream.hyperstream">
+        function <span class="apidocSignatureSpan"></span>hyperstream
+        <span class="apidocSignatureSpan">(streams)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">hyperstream = function (streams) {
+    if (!streams) streams = {};
+    var tr = trumpet();
+    tr.setMaxListeners(Infinity);
+    Object.keys(streams).forEach(function (key) {
+        var value = streams[key];
+        var vstream;
+
+        if (value === null) return;
+        if (typeof value === &#x27;object&#x27; &#x26;&#x26; value.pipe) {
+            vstream = through();
+            value.pipe(vstream);
+        }
+
+        if (/:first$/.test(key)) {
+            tr.select(key.replace(/:first$/,&#x27;&#x27;), onmatch);
+        }
+        else tr.selectAll(key, onmatch);
+
+        function onmatch (elem) {
+            if (typeof value === &#x27;string&#x27;) {
+                elem.createWriteStream().end(value);
+            }
+            else if (isStream(value)) {
+                vstream.pipe(elem.createWriteStream());
+            }
+            else if (typeof value === &#x27;object&#x27;) {
+                Object.keys(value).forEach(function (prop) {
+                    var lprop = prop.toLowerCase();
+                    var v = value[prop];
+                    if (prop === &#x27;_html&#x27; &#x26;&#x26; isStream(v)) {
+                        v.pipe(elem.createWriteStream())
+                    }
+                    else if (prop === &#x27;_html&#x27; &#x26;&#x26; (Buffer.isBuffer(v)
+                    || typeof v === &#x27;string&#x27;)) {
+                        elem.createWriteStream().end(v);
+                    }
+                    else if (prop === &#x27;_html&#x27;) {
+                        elem.createWriteStream().end(String(value[prop]));
+                    }
+                    else if (prop === &#x27;_text&#x27; &#x26;&#x26; isStream(v)) {
+                        v.pipe(encoder()).pipe(elem.createWriteStream());
+                    }
+                    else if (prop === &#x27;_text&#x27;) {
+                        elem.createWriteStream().end(ent.encode(String(v)));
+                    }
+                    else if (lprop === &#x27;_appendhtml&#x27; &#x26;&#x26; (Buffer.isBuffer(v)
+                    || typeof v === &#x27;string&#x27;)) {
+                        var body = elem.createStream();
+                        body.pipe(body, { end: false });
+                        body.on(&#x27;end&#x27;, function () { body.end(v) });
+                    }
+                    else if (lprop === &#x27;_appendhtml&#x27; &#x26;&#x26; isStream(v)) {
+                        var body = elem.createStream();
+                        body.pipe(body, { end: false });
+                        body.on(&#x27;end&#x27;, function (){ v.pipe(body) });
+                    }
+                    else if (lprop === &#x27;_prependhtml&#x27; &#x26;&#x26; (Buffer.isBuffer(v)
+                    || typeof v === &#x27;string&#x27;)) {
+                        var body = elem.createStream();
+                        body.write(v);
+                        body.pipe(body);
+                    }
+                    else if (lprop === &#x27;_prependhtml&#x27; &#x26;&#x26; isStream(v)) {
+                        var body = elem.createStream();
+                        v.pipe(body, { end: false })
+                        v.on(&#x27;end&#x27;, function () { body.pipe(body) });
+                    }
+                    else if ((prop === &#x27;_append&#x27; || lprop === &#x27;_appendtext&#x27;)
+                    &#x26;&#x26; (Buffer.isBuffer(v) || typeof v === &#x27;string&#x27;)) {
+                        var body = elem.createStream();
+                        body.pipe(body, { end: false });
+                        body.on(&#x27;end&#x27;, function () {
+                            body.end(ent.encode(toStr(v)));
+                        });
+                    }
+                    else if ((prop === &#x27;_append&#x27; || lprop === &#x27;_appendtext&#x27;)
+                    &#x26;&#x26; isStream(v)) {
+                        var body = elem.createStream();
+                        body.pipe(body, { end: false });
+                        body.on(&#x27;end&#x27;, function () {
+                            v.pipe(encoder()).pipe(body);
+                        });
+                    }
+                    else if ((prop === &#x27;_prepend&#x27; || lprop === &#x27;_prependtext&#x27;)
+                    &#x26;&#x26; (Buffer.isBuffer(v) || typeof v === &#x27;string&#x27;)) {
+                        var body = elem.createStream();
+                        body.write(ent.encode(toStr(v)));
+                        body.pipe(body);
+                    } ...</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.hyperstream.toString" id="apidoc.element.hyperstream.toString">
+        function <span class="apidocSignatureSpan">hyperstream.</span>toString
+        <span class="apidocSignatureSpan">()</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">toString = function () {
+    return text;
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+                    else elem.setAttribute(prop, vp);
+                }
+            });
+        }
+        else if (typeof value === &#x27;function&#x27;) {
+            var stream = elem.createStream();
+            stream.pipe(concat(function (body) {
+                stream.end(toStr(value(body.<span class="apidocCodeKeywordSpan">toString</span>(&#x27;utf8&#x27;))));
+            }));
+        }
+        else {
+            elem.createWriteStream().end(String(value));
+        }
+    }
+});
+...</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.hyperstream.toString" id="apidoc.module.hyperstream.toString">module hyperstream.toString</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.hyperstream.toString.toString" id="apidoc.element.hyperstream.toString.toString">
+        function <span class="apidocSignatureSpan">hyperstream.</span>toString
+        <span class="apidocSignatureSpan">()</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function toString() { [native code] }</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+                    else elem.setAttribute(prop, vp);
+                }
+            });
+        }
+        else if (typeof value === &#x27;function&#x27;) {
+            var stream = elem.createStream();
+            stream.pipe(concat(function (body) {
+                stream.end(toStr(value(body.<span class="apidocCodeKeywordSpan">toString</span>(&#x27;utf8&#x27;))));
+            }));
+        }
+        else {
+            elem.createWriteStream().end(String(value));
+        }
+    }
+});
+...</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocFooterDiv">
+    [ this document was created with
+    <a href="https://github.com/kaizhu256/node-utility2" target="_blank">utility2</a>
+    ]
+</div>
+</div>
