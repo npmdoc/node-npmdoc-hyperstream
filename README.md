@@ -1,4 +1,7 @@
-# api documentation for  [hyperstream (v1.2.2)](https://github.com/substack/hyperstream)  [![npm package](https://img.shields.io/npm/v/npmdoc-hyperstream.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-hyperstream) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-hyperstream.svg)](https://travis-ci.org/npmdoc/node-npmdoc-hyperstream)
+# npmdoc-hyperstream
+
+#### basic api documentation for  [hyperstream (v1.2.2)](https://github.com/substack/hyperstream)  [![npm package](https://img.shields.io/npm/v/npmdoc-hyperstream.svg?style=flat-square)](https://www.npmjs.org/package/npmdoc-hyperstream) [![travis-ci.org build-status](https://api.travis-ci.org/npmdoc/node-npmdoc-hyperstream.svg)](https://travis-ci.org/npmdoc/node-npmdoc-hyperstream)
+
 #### stream html into html at a css selector
 
 [![NPM](https://nodei.co/npm/hyperstream.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/hyperstream)
@@ -73,7 +76,8 @@
     "scripts": {
         "test": "tap test/*.js"
     },
-    "version": "1.2.2"
+    "version": "1.2.2",
+    "bin": {}
 }
 ```
 
